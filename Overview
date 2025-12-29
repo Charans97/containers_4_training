@@ -1,0 +1,111 @@
+Why Docker Containers Instead of Virtual Machines
+
+For this training infrastructure, Docker containers were chosen over traditional virtual machines (VMs) to achieve speed, simplicity, portability, and resource efficiency.
+
+1. Lightweight and Resource-Efficient
+
+Virtual machines require a full guest operating system per instance, consuming significant CPU, memory, and storage. Docker containers, on the other hand, share the host OS kernel and run only the required processes.
+
+Impact:
+
+Faster startup time (seconds instead of minutes)
+
+Lower memory and CPU footprint
+
+Ability to run multiple nodes on a single laptop or VM
+
+This makes containers ideal for training and lab environments, where multiple nodes (control + workers) are needed without heavy infrastructure.
+
+2. Faster Provisioning and Tear-Down
+
+With VMs, provisioning involves OS installation, network setup, and configuration management. Using Docker:
+
+The entire environment is brought up using a single docker compose up command
+
+Containers can be destroyed and recreated instantly using docker compose down -v
+
+This allows trainees to reset the environment quickly and repeat exercises without manual cleanup.
+
+3. Consistency Across Environments
+
+VM-based labs often behave differently across machines due to OS drift or configuration differences. Docker containers ensure:
+
+Identical runtime behavior across systems
+
+Same OS base image and packages for all users
+
+No “works on my machine” issues
+
+This guarantees a consistent training experience for every participant.
+
+4. No Hypervisor or Nested Virtualization Required
+
+Running multiple VMs requires a hypervisor and, in many cases, nested virtualization support. Docker avoids this completely.
+
+Advantages:
+
+Works on laptops, cloud VMs, and CI environments
+
+No dependency on VirtualBox, VMware, or KVM
+
+Suitable even in restricted corporate environments
+
+5. Ideal for Simulating Distributed Systems
+
+Although containers are lightweight, they can still:
+
+Run full Linux environments
+
+Communicate over virtual Docker networks
+
+Use SSH and standard Linux tooling
+
+This makes them sufficient for simulating multi-node infrastructures such as control nodes and worker nodes, without the overhead of full VMs.
+
+How the Infrastructure Was Created
+
+This repository sets up a multi-node training environment using Docker Compose, designed to mimic a real distributed setup.
+
+1. Container Image Creation (Dockerfile)
+
+A custom Docker image is built using a Dockerfile that:
+
+Uses a Linux base image
+
+Installs essential packages (SSH, utilities, etc.)
+
+Prepares the container to behave like a minimal server
+
+This image is reused across all nodes to ensure uniformity.
+
+2. Multi-Node Topology (docker-compose.yml)
+
+The docker-compose.yml file defines:
+
+Multiple services (representing different nodes)
+
+A shared Docker network for inter-container communication
+
+Hostnames to simulate real machines
+
+Volume mounts for shared data (where required)
+
+Each service represents a logical node in the training environment.
+
+3. Centralized SSH Access Setup
+
+To enable password-less SSH access between nodes:
+
+An SSH key pair is generated inside the control container
+
+The public key is copied to a shared location
+
+The ssh.sh script appends this key to the authorized_keys file of all target containers
+
+This setup enables:
+
+Seamless SSH connectivity
+
+Automation and orchestration exercises
+
+A workflow similar to real infrastructure environments
