@@ -6,7 +6,9 @@ services:
       context: . 
       dockerfile: Dockerfile
     hostname: ansible-control
- 
+    volumes:
+      - ./vol:/opt/
+
   kafka1:
     build:
       context: ./  # This is the directory where your Dockerfile-inventory-node resides
