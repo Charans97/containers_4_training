@@ -33,7 +33,7 @@ chmod +x ssh.sh
 ./ssh.sh
 ```
 
-### Destroy the environment
+### Destroy the environment(once everything is done)
 
 ```sh
 docker compose down -v
