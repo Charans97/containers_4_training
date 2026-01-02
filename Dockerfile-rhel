@@ -1,0 +1,67 @@
+# --------------------------------------------------
+# Base Image (RHEL 9 compatible, no subscription needed)
+# --------------------------------------------------
+FROM registry.access.redhat.com/ubi9/ubi:latest
+
+# --------------------------------------------------
+# Locale (prevents warnings)
+# --------------------------------------------------
+ENV LANG=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
+
+# --------------------------------------------------
+# System Dependencies + SSH
+# --------------------------------------------------
+RUN dnf -y update && \
+    dnf -y install --allowerasing \
+        sudo \
+        openssl \
+        openssh \
+        openssh-clients \
+        openssh-server \
+        sshpass \
+        curl \
+        ca-certificates \
+        gnupg2 \
+        which \
+        shadow-utils \
+        glibc-langpack-en \
+    && mkdir -p /var/run/sshd \
+    && ssh-keygen -A \
+    && sed -i 's/^#PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config \
+    && sed -i 's/^#PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config \
+    && dnf clean all
+
+# --------------------------------------------------
+# Python 3.11 + pip (RHEL-safe, no alternatives)
+# --------------------------------------------------
+RUN dnf -y install \
+        python3.11 \
+        python3.11-devel \
+        python3.11-pip \
+    && ln -sf /usr/bin/python3.11 /usr/bin/python3 \
+    && python3.11 -m pip install --upgrade pip \
+    && dnf clean all
+
+# --------------------------------------------------
+# Java 21 (OpenJDK)
+# --------------------------------------------------
+RUN dnf -y install \
+        java-21-openjdk-headless \
+    && dnf clean all
+
+# --------------------------------------------------
+# Environment Variables
+# --------------------------------------------------
+ENV JAVA_HOME=/usr/lib/jvm/java-21-openjdk
+ENV PATH=$JAVA_HOME/bin:$PATH
+
+# --------------------------------------------------
+# Expose SSH
+# --------------------------------------------------
+EXPOSE 22
+
+# --------------------------------------------------
+# Start SSHD (container-safe)
+# --------------------------------------------------
+CMD ["/usr/sbin/sshd", "-D"]
